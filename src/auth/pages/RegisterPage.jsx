@@ -1,9 +1,9 @@
-import { Button, Grid, Link, TextField, Typography } from '@mui/material'
-import React, { useState } from 'react'
+import { Alert, Button, Grid, Link, TextField, Typography } from '@mui/material'
+import React, { useMemo, useState } from 'react'
 import { Link as RouterLink } from 'react-router-dom';
 import { AuthLayout } from '../layout/AuthLayout';
 import { useForm } from '../../hooks/useForm';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { startCreatingUserWithEmailPassword } from '../../store/auth/thunks';
 
 const formValidations = {
@@ -19,10 +19,15 @@ const formData = {
 
 
 export const RegisterPage = () => {
+
   const [formSubmitted, setformSubmitted] = useState(false);
+  
   const dispatch = useDispatch();
+  const {status,errorMessage} = useSelector(state => state.auth);
+  const isChekingAuthentication = useMemo( () => status === 'checking', [status] );
   const {isFormValid,displayNameValid,emailValid,passwordValid,displayName,email, onInputChange, password,formState } = useForm(formData,formValidations);
 //  console.log(displayNameValid)
+
   const onSubmit=(e)=>{
     e.preventDefault();
       setformSubmitted(true);
@@ -32,7 +37,6 @@ export const RegisterPage = () => {
 
   return (
     <AuthLayout title='Crear cuenta'>
-      <h1>formValue {isFormValid ? 'valido' : 'incorrecto'} </h1>
       <form onSubmit={onSubmit}>
         <Grid container>
           <Grid item xs={12} sx={{ mt: 2 }}>
@@ -77,12 +81,14 @@ export const RegisterPage = () => {
             />
           </Grid>
           <Grid container spacing={2} sx={{ mb: 2, mt: 1 }}>
+            <Grid item xs={12} display={!!errorMessage ? '' : 'none'}>
+             <Alert severity='error'>{errorMessage}</Alert>
+            </Grid>
             <Grid item xs={12}>
-              <Button type='submit' variant='contained' fullWidth>
+              <Button disabled={isChekingAuthentication} type='submit' variant='contained' fullWidth>
                 Crear Cuenta
               </Button>
             </Grid>
-           
           </Grid>
 
           <Grid container direction='row' justifyContent='end'>
